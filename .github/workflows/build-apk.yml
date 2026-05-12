@@ -1,32 +1,38 @@
-name: Build APK
+import flet as ft
 
-on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
+def main(page: ft.Page):
+    page.title = "Calculadora Financiera"
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.padding = 30
+    
+    # Título
+    titulo = ft.Text("💰 Calculadora Financiera", size=30, weight=ft.FontWeight.BOLD)
+    
+    # Campos de entrada
+    monto = ft.TextField(label="Monto (USD)", keyboard_type=ft.KeyboardType.NUMBER, width=300)
+    tasa = ft.TextField(label="Tasa interés (%)", keyboard_type=ft.KeyboardType.NUMBER, width=300)
+    plazo = ft.TextField(label="Plazo (meses)", keyboard_type=ft.KeyboardType.NUMBER, width=300)
+    resultado = ft.Text("", size=18, color=ft.colors.GREEN)
+    
+    def calcular(e):
+        try:
+            m = float(monto.value)
+            t = float(tasa.value)
+            p = float(plazo.value)
+            
+            if t > 0:
+                tasa_mensual = (t / 100) / 12
+                cuota = m * (tasa_mensual * (1 + tasa_mensual)**p) / ((1 + tasa_mensual)**p - 1)
+                resultado.value = f"📊 Cuota mensual: ${cuota:,.2f}\n💰 Total pagado: ${cuota * p:,.2f}"
+            else:
+                resultado.value = f"📊 Cuota mensual: ${m/p:,.2f}\n💰 Total pagado: ${m:,.2f}"
+            page.update()
+        except:
+            resultado.value = "❌ Error: Ingresa números válidos"
+            page.update()
+    
+    btn = ft.ElevatedButton("Calcular", on_click=calcular, icon=ft.icons.CALCULATE)
+    
+    page.add(titulo, ft.Divider(), monto, tasa, plazo, btn, ft.Divider(), resultado)
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install Flet
-      run: |
-        pip install --upgrade flet
-    
-    - name: Build APK
-      run: |
-        flet build apk
-    
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: CalculadoraFinanciera
-        path: ./build/apk/*.apk
+ft.app(target=main)
