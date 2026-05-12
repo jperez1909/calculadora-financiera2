@@ -1,4 +1,4 @@
-name: Build Flet APK
+name: Diagnostic Build
 
 on:
   push:
@@ -6,30 +6,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  diagnose:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install Flet
-      run: |
-        pip install --upgrade pip
-        pip install flet
-    
-    - name: Build APK
-      run: |
-        flet build apk
-    
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: Calculadora-Financiera
-        path: build/apk/*.apk
+      - uses: actions/checkout@v4
+      
+      - name: List all files
+        run: |
+          echo "=== Repository Structure ==="
+          ls -la
+          echo "=== Check main.py exists ==="
+          if [ -f "main.py" ]; then
+            echo "✅ main.py exists"
+            cat main.py | head -20
+          else
+            echo "❌ main.py NOT FOUND!"
+            exit 1
+          fi
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Check Python syntax
+        run: |
+          python -m py_compile main.py
+          echo "✅ Python syntax is valid"
+      
+      - name: Install Flet
+        run: |
+          pip install flet
+          echo "✅ Flet installed"
+      
+      - name: Try build
+        run: |
+          flet build apk 2>&1 | tee build.log
+          echo "=== Build exit code: $? ==="
+      
+      - name: Show error if any
+        if: failure()
+        run: |
+          echo "=== Last 50 lines of build log ==="
+          tail -50 build.log 2>/dev/null || echo "No build.log found"
