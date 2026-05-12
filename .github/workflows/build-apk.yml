@@ -1,0 +1,73 @@
+# main.py
+import flet as ft
+
+def main(page: ft.Page):
+    page.title = "Calculadora Financiera"
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.theme_mode = ft.ThemeMode.LIGHT  # o DARK
+    
+    # Título
+    titulo = ft.Text(
+        "💰 Calculadora Financiera",
+        size=30,
+        weight=ft.FontWeight.BOLD,
+        color=ft.colors.GREEN_700
+    )
+    
+    # Campos de entrada comunes
+    monto_input = ft.TextField(
+        label="Monto Principal (USD)",
+        prefix_text="$",
+        keyboard_type=ft.KeyboardType.NUMBER,
+        hint_text="Ej: 10000",
+        width=250
+    )
+    
+    tasa_input = ft.TextField(
+        label="Tasa de Interés (%)",
+        suffix_text="%",
+        keyboard_type=ft.KeyboardType.NUMBER,
+        hint_text="Ej: 5.5",
+        width=250
+    )
+    
+    periodo_input = ft.TextField(
+        label="Período (meses/años)",
+        keyboard_type=ft.KeyboardType.NUMBER,
+        hint_text="Ej: 12",
+        width=250
+    )
+    
+    # Botón de cálculo
+    calcular_btn = ft.ElevatedButton(
+        "Calcular", 
+        icon=ft.icons.CALCULATE,
+        color=ft.colors.WHITE,
+        bgcolor=ft.colors.GREEN_600,
+        on_click=lambda e: print("Calculando...")  # temporal
+    )
+    
+    # Resultado
+    resultado_text = ft.Text("", size=18, color=ft.colors.BLUE_800)
+    
+    # Organizar en columna
+    columna = ft.Column(
+        [
+            titulo,
+            ft.Divider(height=20, color=ft.colors.TRANSPARENT),
+            monto_input,
+            tasa_input,
+            periodo_input,
+            ft.Divider(height=20),
+            calcular_btn,
+            ft.Divider(height=20),
+            resultado_text
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        spacing=15
+    )
+    
+    page.add(columna)
+
+ft.app(target=main)
